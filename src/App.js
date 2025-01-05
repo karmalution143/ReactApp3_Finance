@@ -5,7 +5,7 @@ import Navbar from './components/Navbar/Navbar';
 import Footer from './components/Footer/Footer';
 import AddStock from './components/AddStock';
 import Watchlist from './components/Watchlist';
-import About from './About/About';
+import About from './components/About/About';
 import EditStock from './components/EditStock';
 
 function App() {
