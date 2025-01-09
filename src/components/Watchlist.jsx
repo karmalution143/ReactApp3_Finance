@@ -8,6 +8,7 @@ function Watchlist() {
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState('');
     const [currentDate, setCurrentDate] = useState('');
+    const [currentPage, setCurrentPage] = useState(1);
 
     const navigate = useNavigate();
 
@@ -24,10 +25,14 @@ function Watchlist() {
 
         const fetchWatchlist = async () => {
             try {
-                const response = await axios.get(`${process.env.REACT_APP_API_BASE_URL}/get-watchlist.php`);
+                const response = await axios.get(`${process.env.REACT_APP_API_BASE_URL}/get-watchlist.php`, {
+                    params: {
+                        page: currentPage,
+                    },
+                });
                 const watchlist = response.data;
-
-                const stockPromises = watchlist.map(async (stock) => {
+                if (Array.isArray(watchlist.stocks)) {
+                const stockPromises = watchlist.stocks.map(async (stock) => {
                     // Initialize stock data with defaults
                     const stockData = { ...stock, price: 'N/A', companyName: stock.symbol };
 
@@ -57,6 +62,9 @@ function Watchlist() {
                 const stocksWithPrices = await Promise.all(stockPromises);
                 setStocks(stocksWithPrices);
                 setIsLoading(false);
+            } else {
+                throw new Error('Stocks data is not an array');
+            }
             } catch (err) {
                 console.error(err);
                 setError('Failed to load watchlist.');
@@ -65,7 +73,7 @@ function Watchlist() {
         };
 
         fetchWatchlist();
-    }, []);
+    }, [currentPage]);
 
     const handleDelete = async (id) => {
       if (!window.confirm("Are you sure you want to delete this stock?")) return;
@@ -73,7 +81,6 @@ function Watchlist() {
       try {
           const response = await axios.delete(`${process.env.REACT_APP_API_BASE_URL}/delete-stock.php?id=${id}`);
           if (response.status === 204) {
-              // Remove the deleted stock from the local state
               setStocks(stocks.filter((stock) => stock.id !== id));
           } else {
               alert("Failed to delete the stock. Please try again.");
@@ -82,6 +89,10 @@ function Watchlist() {
           console.error("Error deleting stock:", err);
           alert("An error occurred while trying to delete the stock.");
       }
+    };
+
+    const handlePageChange = (page) => {
+        setCurrentPage(page);
     };
 
     const handleEdit = (id) => {
@@ -141,6 +152,22 @@ function Watchlist() {
                     })}
                 </tbody>
             </table>
+            <div className="pagination-controls mt-4">
+                <button 
+                    className="btn btn-outline-primary"
+                    onClick={() => handlePageChange(currentPage - 1)}
+                    disabled={currentPage <= 1}
+                >
+                    Previous
+                </button>
+                <span className="mx-2">Page {currentPage}</span>
+                <button 
+                    className="btn btn-outline-primary"
+                    onClick={() => handlePageChange(currentPage + 1)}
+                >
+                    Next
+                </button>
+            </div>
             <div className="mt-4">
                 <small className="text-muted d-block">
                     * Note: API requests are limited to 5 calls per minute as the website is currently in beta testing. 

@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: localhost
--- Generation Time: Jan 04, 2025 at 09:40 PM
+-- Generation Time: Jan 09, 2025 at 01:42 PM
 -- Server version: 10.4.28-MariaDB
 -- PHP Version: 8.2.4
 
@@ -39,10 +39,13 @@ CREATE TABLE `watchlist` (
 --
 
 INSERT INTO `watchlist` (`id`, `symbol`, `note`, `created_at`) VALUES
-(1, 'TSLA', 'Going higher and higher\n', '2025-01-01 19:50:31'),
+(1, 'TSLA', 'Going higher\n', '2025-01-01 19:50:31'),
 (7, 'NVDA', 'Split 10 to 1 in June 2024\n', '2025-01-02 01:00:48'),
 (8, 'SQ', 'Bought 25 in October', '2025-01-02 01:03:19'),
-(16, 'AMZN', 'Waiting till year end', '2025-01-05 02:33:12');
+(17, 'AMZN', 'Waiting for year end results', '2025-01-05 19:29:57'),
+(18, 'NIO', 'This was a scam\n', '2025-01-09 15:05:11'),
+(19, 'KMX', 'Still like this one', '2025-01-09 15:05:26'),
+(20, 'SNAP', 'This company needs to get their act together\n', '2025-01-09 18:38:46');
 
 --
 -- Indexes for dumped tables
@@ -62,7 +65,7 @@ ALTER TABLE `watchlist`
 -- AUTO_INCREMENT for table `watchlist`
 --
 ALTER TABLE `watchlist`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=17;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=21;
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
