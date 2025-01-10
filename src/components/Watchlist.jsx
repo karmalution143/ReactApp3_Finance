@@ -9,6 +9,7 @@ function Watchlist() {
     const [error, setError] = useState('');
     const [currentDate, setCurrentDate] = useState('');
     const [currentPage, setCurrentPage] = useState(1);
+    const [totalPages, setTotalPages] = useState(1);
 
     const navigate = useNavigate();
 
@@ -24,14 +25,22 @@ function Watchlist() {
         setCurrentDate(formattedDate);
 
         const fetchWatchlist = async () => {
+            setIsLoading(true);
+            setError('');
+
             try {
                 const response = await axios.get(`${process.env.REACT_APP_API_BASE_URL}/get-watchlist.php`, {
-                    params: {
-                        page: currentPage,
-                    },
+                    params: { page: currentPage },
                 });
+
                 const watchlist = response.data;
-                if (Array.isArray(watchlist.stocks)) {
+
+                if (!Array.isArray(watchlist.stocks)) {
+                    throw new Error('Stocks data is not an array');
+                }
+
+                setTotalPages(watchlist.totalPages);
+
                 const stockPromises = watchlist.stocks.map(async (stock) => {
                     // Initialize stock data with defaults
                     const stockData = { ...stock, price: 'N/A', companyName: stock.symbol };
@@ -41,7 +50,7 @@ function Watchlist() {
                         const priceResponse = await axios.get(
                             `https://api.polygon.io/v2/aggs/ticker/${stock.symbol}/prev?apiKey=${process.env.REACT_APP_POLYGON_API_KEY}`
                         );
-                        stockData.price = priceResponse.data.results[0]?.c || 'N/A';
+                        stockData.price = priceResponse.data.results[0]?.c || 'API Exceeded';
                     } catch (err) {
                         console.error(`You've exceeded the maximum requests per minute, please wait or upgrade your subscription to continue`, err);
                     }
@@ -60,14 +69,13 @@ function Watchlist() {
                 });
 
                 const stocksWithPrices = await Promise.all(stockPromises);
+
                 setStocks(stocksWithPrices);
-                setIsLoading(false);
-            } else {
-                throw new Error('Stocks data is not an array');
-            }
+
             } catch (err) {
                 console.error(err);
                 setError('Failed to load watchlist.');
+            } finally {
                 setIsLoading(false);
             }
         };
@@ -96,7 +104,6 @@ function Watchlist() {
     };
 
     const handleEdit = (id) => {
-
         const stockToEdit = stocks.find(stock => stock.id === id);
 
         navigate(`/edit-stock/${id}`, { state: { stock: stockToEdit } });
@@ -160,10 +167,11 @@ function Watchlist() {
                 >
                     Previous
                 </button>
-                <span className="mx-2">Page {currentPage}</span>
+                <span className="mx-2">Page {currentPage} of {totalPages}</span>
                 <button 
                     className="btn btn-outline-primary"
                     onClick={() => handlePageChange(currentPage + 1)}
+                    disabled={currentPage >=totalPages}
                 >
                     Next
                 </button>
